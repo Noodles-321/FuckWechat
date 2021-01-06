@@ -1,0 +1,2 @@
+# FuckWechat
+Automate WeChat operationss
