@@ -22,21 +22,20 @@ def migrate_account_subscription(n_accounts, i_start=0):
     pos_header = (pos_header.x, pos_header.y) if pos_header is not None else (974, 185)
     pg.click(pos_header)
         
+    limit_check = True
+    
     while pg.locateCenterOnScreen('./pin.png') is None:
-        pg.hotkey('shift', 'tab')
+        pg.hotkey('tab')
     pg.hotkey('shift', 'tab')
+    
+    pg.press('right', presses=i_start, interval=0.01)
     
     #pg.press('enter', interval=5)
     if pg.confirm(text='Ready to start?', title='Ready to start?', buttons=['OK', 'Cancel']) == 'Cancel':
         sys.exit()
 #    time.sleep(5)
     
-    
     for i in tqdm(list(range(n_accounts))[i_start:]):    # loop over account list
-        if i != 0:
-            pg.click(pos_header)    # move accounts list to frontground
-            pg.press('right')
-            
         # Send
     #    pg.click(pos_header)
         pg.press('enter', interval=0.1)     # wait 0.1s for fucking WeChat to load
@@ -60,7 +59,7 @@ def migrate_account_subscription(n_accounts, i_start=0):
                 continue
         
         # Receive
-        time.sleep(0.1)
+#        time.sleep(2)
         pg.click(x=218, y=850, interval=1)
         pos_subscribe = pg.locateCenterOnScreen('./subscribe.png')
         if pos_subscribe is not None:
@@ -75,14 +74,21 @@ def migrate_account_subscription(n_accounts, i_start=0):
         while pg.locateOnScreen('./subscribed.png') is None:
             time.sleep(0.1)
         pg.rightClick()     # back to chating panel
-        i += 1
-        if i - i_start >= 35 and pg.confirm(
-                text=f"Reaching temporary subscription limit. \nBetter to resume next time at {i+1}/{n_accounts}. \n\nAbort?", 
-                title='Reaching temporary subscription limit', 
-                buttons=['Yes', 'No']
-                ) == 'Yes':
-            sys.exit(f"Reaching temporary subscription limit. Better to resume next time at {i+1}/{n_accounts}.")
 
+        i += 1
+        if limit_check == True:
+            if i - i_start >= 35 and pg.confirm(
+                    text=f"Reaching temporary subscription limit. \nBetter to resume next time at {i+1}/{n_accounts}. \n\nAbort?", 
+                    title='Reaching temporary subscription limit', 
+                    buttons=['Yes', 'No']
+                    ) == 'Yes':
+                sys.exit(f"Reaching temporary subscription limit. Better to resume next time at {i+1}/{n_accounts}.")
+            else:
+                limit_check = False
+
+        pg.click(pos_header)    # move accounts list to frontground
+        pg.press('right')
+        
 # %%
 if __name__ == "__main__":
-  migrate_account_subscription(n_accounts=230, i_start=45)
+  migrate_account_subscription(n_accounts=230, i_start=95)
